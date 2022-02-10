@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "GyeonggiTitleM";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GyeonggiTitleM.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: "GyeonggiTitleM";
+}
+
+.bgBlur:before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background: inherit;
+  z-index: -1;
+  filter: blur(6px) brightness(70%);
+  -webkit-filter: blur(6px)brightness(70%);
+  -moz-filter: blur(6px) brightness(70%);
+  -o-filter: blur(6px) brightness(70%);
+  scale: 1.1;
+}
