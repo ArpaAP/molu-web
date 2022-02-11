@@ -11,7 +11,7 @@ const App: React.FC = () => {
   const [githubShow, setGithubShow] = useState(false);
   const codeRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const [chatList, setChatList] = useState<
     { type: "input" | "output"; content: string | ReactNode }[]
