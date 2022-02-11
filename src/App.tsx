@@ -89,6 +89,14 @@ const App: React.FC = () => {
                 </div>
                 <a
                   className="h-12 bg-slate-200 flex items-center p-2 text-xl m-2 rounded-lg"
+                  href="https://github.com/ArpaAP/mollang"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  몰랭 문법 가이드
+                </a>
+                <a
+                  className="h-12 bg-slate-200 flex items-center p-2 text-xl m-2 rounded-lg"
                   href="https://github.com/ArpaAP/mollang/tree/main/examples"
                   target="_blank"
                   rel="noreferrer"
