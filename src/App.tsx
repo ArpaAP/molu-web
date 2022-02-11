@@ -164,7 +164,7 @@ const App: React.FC = () => {
                 <div className="flex flex-col">
                   <button
                     type="button"
-                    className="w-16 h-full text-xl bg-slate-400 hover:brightness-110 transition-all duration-300"
+                    className="w-16 h-full text-xl bg-blue-400 hover:brightness-110 transition-all duration-300"
                     onClick={async () => {
                       let code = codeRef.current!.value;
                       let newChatList = [...chatList];
@@ -192,7 +192,7 @@ const App: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    className="bg-orange-200 hover:brightness-105 rounded-br-xl transition-all duration-300"
+                    className="bg-slate-200 hover:brightness-105 rounded-br-xl transition-all duration-300"
                     onClick={() =>
                       setChatList([
                         {
