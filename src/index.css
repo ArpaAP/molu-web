@@ -27,8 +27,29 @@ body {
   background: inherit;
   z-index: -1;
   filter: blur(6px) brightness(70%);
-  -webkit-filter: blur(6px)brightness(70%);
+  -webkit-filter: blur(6px) brightness(70%);
   -moz-filter: blur(6px) brightness(70%);
   -o-filter: blur(6px) brightness(70%);
-  scale: 1.1;
+}
+
+.Sidebar-button {
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.Sidebar-button:hover {
+  background-color: #5d6e86;
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 14px;
+  height: 8px;
+  border-radius: 15px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(191, 191, 201) !important;
+  border-radius: 15px;
 }
