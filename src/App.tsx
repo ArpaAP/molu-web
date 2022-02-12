@@ -4,23 +4,27 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import background from "./images/background.jpg";
 import arona from "./images/arona.jpg";
 import aru from "./images/aru.jpg";
-import { faList } from "@fortawesome/free-solid-svg-icons";
+import { faGear, faList } from "@fortawesome/free-solid-svg-icons";
 
-import runMolu from "./mollang/index";
+import runMolu from "mollang-core";
 import EXAMPLES from "./data/examples";
 
 const App: React.FC = () => {
   const [githubShow, setGithubShow] = useState(false);
   const codeRef = useRef<HTMLTextAreaElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState<
+    "examples" | "settings" | false
+  >("examples");
+  const [version, setVersion] = useState("1.0");
+  const [maxRecursion, setMaxRecursion] = useState(100000);
 
   const [chatList, setChatList] = useState<
     {
       type: "input" | "output";
       content: string | ReactNode;
       exitCode?: number;
-      isError?: boolean;
+      error?: string | null;
     }[]
   >([
     {
@@ -41,7 +45,7 @@ const App: React.FC = () => {
           backdropFilter: "blur(10px) brightness(70%)",
         }}
       >
-        <div className="h-5/6 w-5/6 md:h-4/5 lg:h-3/4 2xl:w-4/6 mb-14 rounded-xl">
+        <div className="h-5/6 w-5/6 md:h-4/5 lg:h-3/4 xl:w-5/6 2xl:w-4/6 mb-14 rounded-xl">
           <header className="h-16 bg-sky-400 shadow-xl rounded-t-xl flex items-center text-2xl lg:text-3xl text-white px-5">
             몰랭 웹 인터?프리터
             <span className="ml-3" style={{ fontSize: 17 }}>
@@ -55,9 +59,31 @@ const App: React.FC = () => {
             >
               <div
                 className="Sidebar-button w-full h-16 flex justify-center items-center cursor-pointer"
-                onClick={() => setShowSidebar(!showSidebar)}
+                style={{
+                  backgroundColor:
+                    showSidebar === "examples" ? "#5d6e86" : undefined,
+                }}
+                onClick={() =>
+                  setShowSidebar(
+                    showSidebar === "examples" ? false : "examples"
+                  )
+                }
               >
                 <FontAwesomeIcon icon={faList} fontSize={40} />
+              </div>
+              <div
+                className="Sidebar-button w-full h-16 flex justify-center items-center cursor-pointer"
+                style={{
+                  backgroundColor:
+                    showSidebar === "settings" ? "#5d6e86" : undefined,
+                }}
+                onClick={() =>
+                  setShowSidebar(
+                    showSidebar === "settings" ? false : "settings"
+                  )
+                }
+              >
+                <FontAwesomeIcon icon={faGear} fontSize={40} fontWeight={200} />
               </div>
               <div className="relative mt-auto">
                 {githubShow && (
@@ -89,7 +115,7 @@ const App: React.FC = () => {
                 </div>
               </div>
             </nav>
-            {showSidebar && (
+            {showSidebar === "examples" ? (
               <div className="w-1/3 bg-slate-100 hidden md:flex flex-col gap-2 py-2">
                 <div className="px-2.5 text-lg">예제 불러오기</div>
                 <hr />
@@ -120,48 +146,117 @@ const App: React.FC = () => {
                   </a>
                 </div>
               </div>
-            )}
+            ) : showSidebar === "settings" ? (
+              <div className="w-1/3 bg-slate-100 hidden md:flex flex-col gap-2 py-2">
+                <div className="px-2.5 text-lg">인터프리터 설정</div>
+                <hr />
+                <div className="px-2.5 py-1.5 text-xl flex justify-between items-center">
+                  <span className="flex-shrink-0">구현체 버전:</span>
+                  <select
+                    className="ml-4 p-2 rounded-lg outline-none"
+                    onChange={(e) => setVersion(e.target.value)}
+                  >
+                    <option value="1.0">v1.0</option>
+                  </select>
+                </div>
+                <hr />
+                <div className="px-2.5 py-1.5">
+                  <div className="text-xl flex justify-between items-center mb-1">
+                    <span className="flex-shrink-0" defaultValue={60}>
+                      루프 깊이 한계:
+                    </span>
+                    <input
+                      type="text"
+                      className="ml-4 p-2 rounded-lg w-full outline-none text-right"
+                      value={maxRecursion}
+                      min={0}
+                      onChange={(e) => {
+                        let value = Number(e.target.value);
+                        if (isNaN(value)) return;
+
+                        setMaxRecursion(Math.max(value, 0));
+                      }}
+                    />
+                  </div>
+                  <small className="px-0.5 text-sm font-light text-gray-500">
+                    이 횟수 이상 루프가 반복되면 오류를 발생시키고 프로그램을
+                    종료합니다. 0으로 설정하면 무한 루프를 허용합니다.
+                  </small>
+                </div>
+                <hr />
+              </div>
+            ) : null}
             <div className="w-full flex flex-col rounded-br-xl">
               <div
-                className="h-full backdrop-blur-sm p-6 flex flex-col gap-2 overflow-y-scroll scrollbar"
+                className="h-full backdrop-blur-sm p-6 flex flex-col gap-4 overflow-y-scroll scrollbar"
                 style={{ backgroundColor: "rgba(255, 255, 255, 0.75)" }}
               >
                 {chatList.map((chat, index) => (
-                  <div key={index}>
+                  <div key={index} ref={bottomRef}>
                     {chat.type === "output" ? (
-                      <div ref={bottomRef} className="flex lg:mr-28 xl:mr-48">
-                        <img
-                          className="rounded-full mt-2 mr-4 h-12 w-12 md:h-20 md:w-20"
-                          alt=""
-                          src={chat.isError ? aru : arona}
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-xl lg:text-2xl text-gray-800">
-                            {chat.isError ? '아루' : '아로나'}
-                          </span>
-                          <div
-                            className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
-                            style={{ backgroundColor: "#4b5a6f" }}
-                          >
-                            {chat.content ? (
-                              chat.content !== "undefined" ? (
-                                chat.content
-                              ) : (
-                                <i>(값이 존재하지 않습니다.)</i>
-                              )
-                            ) : (
-                              <i>(실행 결과가 없습니다.)</i>
-                            )}
-                          </div>
-                          {chat.exitCode !== undefined ? (
+                      <div className="flex flex-col gap-4">
+                        <div className="flex lg:mr-28 xl:mr-48">
+                          <img
+                            className="rounded-full mt-2 mr-4 h-12 w-12 md:h-20 md:w-20"
+                            alt=""
+                            src={arona}
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-xl lg:text-2xl text-gray-800">
+                              아로나
+                            </span>
                             <div
                               className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
                               style={{ backgroundColor: "#4b5a6f" }}
                             >
-                              종료 코드: {chat.exitCode}
+                              {chat.content ? (
+                                chat.content !== "undefined" ? (
+                                  chat.content
+                                ) : (
+                                  <i>(값이 존재하지 않습니다.)</i>
+                                )
+                              ) : (
+                                <i>(실행 결과가 없습니다.)</i>
+                              )}
                             </div>
-                          ) : null}
+                            {chat.exitCode !== undefined && !chat.error ? (
+                              <div
+                                className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
+                                style={{ backgroundColor: "#4b5a6f" }}
+                              >
+                                종료 코드: {chat.exitCode}
+                              </div>
+                            ) : null}
+                          </div>
                         </div>
+                        {chat.error && (
+                          <div className="flex lg:mr-28 xl:mr-48">
+                            <img
+                              className="rounded-full mt-2 mr-4 h-12 w-12 md:h-20 md:w-20"
+                              alt=""
+                              src={aru}
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-xl lg:text-2xl text-gray-800">
+                                아루
+                              </span>
+                              <div
+                                className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
+                                style={{ backgroundColor: "#4b5a6f" }}
+                              >
+                                {chat.error}
+                              </div>
+                              {chat.exitCode !== undefined ? (
+                                <div
+                                  className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
+                                  style={{ backgroundColor: "#4b5a6f" }}
+                                >
+                                  종료 코드: {chat.exitCode}
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div
@@ -191,7 +286,7 @@ const App: React.FC = () => {
                 <div className="flex flex-col">
                   <button
                     type="button"
-                    className="w-16 h-full text-xl bg-blue-400 hover:brightness-110 transition-all duration-300"
+                    className="w-20 h-full text-xl bg-blue-400 hover:brightness-110 transition-all duration-300"
                     onClick={async () => {
                       let code = codeRef.current!.value;
                       let newChatList = [...chatList];
@@ -203,22 +298,28 @@ const App: React.FC = () => {
 
                       setChatList(newChatList);
 
-                      let result = (await runMolu(code, async () => "1")) as [
-                        string,
-                        number,
-                        boolean
-                      ];
+                      let result = runMolu(code, {
+                        inputFn: () => "1",
+                        maxRecursion,
+                      });
+                      console.log(result);
 
                       newChatList = newChatList.concat({
                         type: "output",
-                        content: result[0],
-                        exitCode: result[1],
-                        isError: result[2],
+                        content: result[0].join("") as string,
+                        exitCode: result[0][0] ? 0 : (result[1][0] as number),
+                        error: (result[2][0] as string) ?? null,
                       });
 
                       setChatList(newChatList);
 
-                      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+                      setTimeout(
+                        () =>
+                          bottomRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                          }),
+                        10
+                      );
                     }}
                   >
                     실행
