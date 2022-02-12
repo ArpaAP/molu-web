@@ -6,5 +6,10 @@ export default async function main(code: string) {
         .split("\n")
         .map((line) => line.trim())
         .join("\n");
-    return run(parse(code));
+
+    let parsed = parse(code);
+
+    if (!parsed[1]) return [parsed[0], null];
+    
+    return run(parsed[0]);
 }

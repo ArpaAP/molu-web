@@ -48,7 +48,7 @@ export default function parse(script) {
             i = ret[1];
             i--;
         } else if (script[i] === ".") {
-            exitMessage(1, ".", [line_number, i]);
+            return [exitMessage(1, ".", [line_number, i]), false];
         } else if (script[i] === "몰" || script[i] === "모") {
             let length = 1;
             while (
@@ -76,7 +76,7 @@ export default function parse(script) {
                     result.tokens.pop();
                     result.tokens.push([4, length, -1]);
                 } else {
-                    exitMessage(3, "루", [line_number, i]);
+                    return [exitMessage(3, "루", [line_number, i]), false];
                 }
             } else {
                 result.tokens.push([3, -1, -1]);
@@ -94,7 +94,7 @@ export default function parse(script) {
                 if_jumppoint.push(result.tokens.length);
                 result.tokens.push([9, -1, -1]);
             } else {
-                exitMessage(2, "?행", [line_number, i]);
+                return [exitMessage(2, "?행", [line_number, i]), false];
             }
             i += 2;
         } else if (script[i] === "털") {
@@ -106,7 +106,7 @@ export default function parse(script) {
                 result.tokens[if_jumppoint[0]][1] = result.tokens.length;
                 if_jumppoint.pop();
             } else {
-                exitMessage(2, "?자", [line_number, i]);
+                return [exitMessage(2, "?자", [line_number, i]), false];
             }
             i += 2;
         } else if (script[i] === "0") {
@@ -144,20 +144,20 @@ export default function parse(script) {
                 }
                 result.tokens.push([10, mode, value]);
             } else {
-                exitMessage(2, "ㅅ0", [line_number, i]);
+                return [exitMessage(2, "ㅅ0", [line_number, i]), false];
             }
         } else if (script[i] === "자") {
             if (i + 1 < script.length && script[i + 1] === "!") {
                 result.tokens.push([7, -1, -1]);
             } else {
-                exitMessage(2, "!", [line_number, i]);
+                return [exitMessage(2, "!", [line_number, i]), false];
             }
         } else if (script[i] === "\n") {
             line_number++;
             result.line_backpoint.push(result.tokens.length);
         } else if (script[i] !== " ") {
-            exitMessage(4, script[i], [line_number, i]);
+            return [exitMessage(4, script[i], [line_number, i]), false];
         }
     }
-    return result;
+    return [result, true];
 }

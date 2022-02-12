@@ -3,9 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import background from "./images/background.jpg";
 import arona from "./images/arona.jpg";
+import aru from "./images/aru.jpg";
 import { faList } from "@fortawesome/free-solid-svg-icons";
 
 import runMolu from "./mollang/index";
+import EXAMPLES from "./data/examples";
 
 const App: React.FC = () => {
   const [githubShow, setGithubShow] = useState(false);
@@ -14,7 +16,11 @@ const App: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(true);
 
   const [chatList, setChatList] = useState<
-    { type: "input" | "output"; content: string | ReactNode }[]
+    {
+      type: "input" | "output";
+      content: string | ReactNode;
+      exitCode?: number;
+    }[]
   >([
     {
       type: "output",
@@ -83,26 +89,35 @@ const App: React.FC = () => {
               </div>
             </nav>
             {showSidebar && (
-              <div className="w-1/3 bg-slate-100 hidden md:block">
-                <div className="h-12 bg-slate-200 flex items-center p-2 text-xl m-2 rounded-lg">
-                  main.molu
+              <div className="w-1/3 bg-slate-100 hidden md:flex flex-col gap-2 py-2">
+                <div className="px-2.5 text-lg">예제 불러오기</div>
+                <hr />
+                <div
+                  className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg cursor-pointer"
+                  onClick={() => {
+                    codeRef.current!.value = EXAMPLES.helloworld;
+                  }}
+                >
+                  helloworld.molu
                 </div>
-                <a
-                  className="h-12 bg-slate-200 flex items-center p-2 text-xl m-2 rounded-lg"
-                  href="https://github.com/ArpaAP/mollang"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  몰랭 문법 가이드
-                </a>
-                <a
-                  className="h-12 bg-slate-200 flex items-center p-2 text-xl m-2 rounded-lg"
-                  href="https://github.com/ArpaAP/mollang/tree/main/examples"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  예제 보기
-                </a>
+                <div className="mt-auto flex flex-col gap-2">
+                  <a
+                    className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg"
+                    href="https://github.com/ArpaAP/mollang"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    몰랭 문법 가이드
+                  </a>
+                  <a
+                    className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg"
+                    href="https://github.com/ArpaAP/mollang/tree/main/examples"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    전체 예제 보기
+                  </a>
+                </div>
               </div>
             )}
             <div className="w-full flex flex-col rounded-br-xl">
@@ -111,46 +126,49 @@ const App: React.FC = () => {
                 style={{ backgroundColor: "rgba(255, 255, 255, 0.75)" }}
               >
                 {chatList.map((chat, index) => (
-                  <>
+                  <div key={index}>
                     {chat.type === "output" ? (
-                      <div
-                        key={index}
-                        ref={bottomRef}
-                        className="flex lg:mr-28 xl:mr-48"
-                      >
+                      <div ref={bottomRef} className="flex lg:mr-28 xl:mr-48">
                         <img
                           className="rounded-full mt-2 mr-4 h-12 w-12 md:h-20 md:w-20"
                           alt=""
                           src={arona}
                         />
-                        <div>
+                        <div className="flex flex-col">
                           <span className="text-xl lg:text-2xl text-gray-800">
                             메로나
                           </span>
                           <div
-                            className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5"
+                            className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
                             style={{ backgroundColor: "#4b5a6f" }}
                           >
                             {chat.content ? (
                               chat.content !== "undefined" ? (
                                 chat.content
                               ) : (
-                                <i>(값이 없습니다.)</i>
+                                <i>(값이 존재하지 않습니다.)</i>
                               )
                             ) : (
-                              "모오오오오올루"
+                              <i>(실행 결과가 없습니다.)</i>
                             )}
                           </div>
+                          {chat.exitCode !== undefined ? (
+                            <div
+                              className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
+                              style={{ backgroundColor: "#4b5a6f" }}
+                            >
+                              종료 코드: {chat.exitCode}
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     ) : (
                       <div
-                        key={index}
                         ref={bottomRef}
                         className="flex justify-end lg:ml-28 xl:ml-48"
                       >
-                        <div className="rounded-xl text-white bg-blue-400 text-xl lg:text-2xl px-3 py-2 mt-1.5">
-                          {chat.content ?? "모오오오오올루"}
+                        <div className="rounded-xl text-white bg-blue-400 text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap">
+                          {chat.content}
                         </div>
                       </div>
                     )}
@@ -158,7 +176,7 @@ const App: React.FC = () => {
                       chatList[index + 1].type !== chat.type && (
                         <div className="h-4" />
                       )}
-                  </>
+                  </div>
                 ))}
               </div>
               <div className="h-52 w-full flex bg-slate-300 rounded-br-xl">
@@ -189,6 +207,7 @@ const App: React.FC = () => {
                       newChatList = newChatList.concat({
                         type: "output",
                         content: result[0],
+                        exitCode: result[1],
                       });
 
                       setChatList(newChatList);
