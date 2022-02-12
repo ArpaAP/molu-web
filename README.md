@@ -5,3 +5,5 @@
 **직접 사용해 보기**: https://molu.vercel.app
 
 몰랭 언어에 관한 자세한 내용은 몰랭 레포지토리(https://github.com/ArpaAP/mollang) 를 참조해주세요.
+
+![스크린샷](screenshot.png)
