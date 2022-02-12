@@ -16,7 +16,6 @@ const App: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState<
     "examples" | "settings" | false
   >("examples");
-  const [version, setVersion] = useState("1.0");
   const [maxRecursion, setMaxRecursion] = useState(100000);
 
   const [chatList, setChatList] = useState<
