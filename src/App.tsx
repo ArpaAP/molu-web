@@ -176,7 +176,8 @@ const App: React.FC = () => {
                   </div>
                   <small className="px-0.5 text-sm font-light text-gray-500">
                     이 횟수 이상 루프가 반복되면 오류를 발생시키고 프로그램을
-                    종료합니다. 0으로 설정하면 무한 루프를 허용합니다.
+                    종료합니다. 0으로 설정하면 무한 루프를 허용합니다.{" "}
+                    <s>굳이?</s>
                   </small>
                 </div>
                 <hr />
@@ -295,7 +296,7 @@ const App: React.FC = () => {
                       setChatList(newChatList);
 
                       let result = runMolu(code, {
-                        inputFn: () => "1",
+                        inputFn: () => "1\n",
                         maxRecursion,
                       });
                       console.log(result);
