@@ -151,10 +151,7 @@ const App: React.FC = () => {
                 <hr />
                 <div className="px-2.5 py-1.5 text-xl flex justify-between items-center">
                   <span className="flex-shrink-0">구현체 버전:</span>
-                  <select
-                    className="ml-4 p-2 rounded-lg outline-none"
-                    onChange={(e) => setVersion(e.target.value)}
-                  >
+                  <select className="ml-4 p-2 rounded-lg outline-none">
                     <option value="1.0">v1.0</option>
                   </select>
                 </div>
