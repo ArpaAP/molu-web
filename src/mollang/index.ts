@@ -1,15 +1,19 @@
 import parse from "./parse";
 import run from "./runtime";
 
-export default async function main(code: string) {
+export default async function main(code: string, input: () => Promise<string>) {
     code = code
         .split("\n")
-        .map((line) => line.trim())
+        .map((line: string) => line.trim())
         .join("\n");
 
-    let parsed = parse(code);
+    let [success, ...parsed] = parse(code);
 
-    if (!parsed[1]) return [parsed[0], null];
+    if (!success) {
+        return [parsed[0] as string, parsed[1] as number, true];
+    }
     
-    return run(parsed[0]);
+    let result = await run(...parsed as [[number, number, number][], number[]], input) as [string, number];
+
+    return [...result, false];
 }

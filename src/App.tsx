@@ -20,6 +20,7 @@ const App: React.FC = () => {
       type: "input" | "output";
       content: string | ReactNode;
       exitCode?: number;
+      isError?: boolean;
     }[]
   >([
     {
@@ -132,11 +133,11 @@ const App: React.FC = () => {
                         <img
                           className="rounded-full mt-2 mr-4 h-12 w-12 md:h-20 md:w-20"
                           alt=""
-                          src={arona}
+                          src={chat.isError ? aru : arona}
                         />
                         <div className="flex flex-col">
                           <span className="text-xl lg:text-2xl text-gray-800">
-                            메로나
+                            {chat.isError ? '아루' : '아로나'}
                           </span>
                           <div
                             className="rounded-xl text-white text-xl lg:text-2xl px-3 py-2 mt-1.5 whitespace-pre-wrap mr-auto"
@@ -202,12 +203,17 @@ const App: React.FC = () => {
 
                       setChatList(newChatList);
 
-                      let result = await runMolu(code);
+                      let result = (await runMolu(code, async () => "1")) as [
+                        string,
+                        number,
+                        boolean
+                      ];
 
                       newChatList = newChatList.concat({
                         type: "output",
                         content: result[0],
                         exitCode: result[1],
+                        isError: result[2],
                       });
 
                       setChatList(newChatList);
