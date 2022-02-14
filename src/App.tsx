@@ -6,8 +6,14 @@ import arona from "./images/arona.jpg";
 import aru from "./images/aru.jpg";
 import { faGear, faList } from "@fortawesome/free-solid-svg-icons";
 
-import runMolu from "mollang-core";
+import runMolu104 from "mollang-core-1.0.4";
+import runMolu112 from "mollang-core-1.1.2";
 import EXAMPLES from "./data/examples";
+
+const VERSIONS = {
+  "1.1.2": runMolu112,
+  "1.0.4": runMolu104,
+};
 
 const App: React.FC = () => {
   const [githubShow, setGithubShow] = useState(false);
@@ -17,6 +23,7 @@ const App: React.FC = () => {
     "examples" | "settings" | false
   >("examples");
   const [maxRecursion, setMaxRecursion] = useState(100000);
+  const [version, setVersion] = useState("1.1.2");
 
   const [chatList, setChatList] = useState<
     {
@@ -118,14 +125,21 @@ const App: React.FC = () => {
               <div className="w-1/3 bg-slate-100 hidden md:flex flex-col gap-2 py-2">
                 <div className="px-2.5 text-lg">예제 불러오기</div>
                 <hr />
-                <div
-                  className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg cursor-pointer"
-                  onClick={() => {
-                    codeRef.current!.value = EXAMPLES.helloworld;
-                  }}
-                >
-                  helloworld.molu
-                </div>
+                {EXAMPLES.filter((one) => one.version === version).map(
+                  (one) => (
+                    <div
+                      className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg cursor-pointer"
+                      onClick={() => {
+                        codeRef.current!.value = one.code;
+                      }}
+                    >
+                      {one.name}.molu
+                      <small className="ml-2 text-gray-500 text-sm">
+                        {one.version}
+                      </small>
+                    </div>
+                  )
+                )}
                 <div className="mt-auto flex flex-col gap-2">
                   <a
                     className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg"
@@ -149,12 +163,28 @@ const App: React.FC = () => {
               <div className="w-1/3 bg-slate-100 hidden md:flex flex-col gap-2 py-2">
                 <div className="px-2.5 text-lg">인터프리터 설정</div>
                 <hr />
-                <div className="px-2.5 py-1.5 text-xl flex justify-between items-center">
-                  <span className="flex-shrink-0">구현체 버전:</span>
-                  <select className="ml-4 p-2 rounded-lg outline-none">
-                    <option value="1.0">v1.0</option>
-                  </select>
+                <div className="px-2.5 py-1.5">
+                  <div className="text-xl flex justify-between items-center mb-1">
+                    <span className="flex-shrink-0">구현체 버전:</span>
+                    <select
+                      className="ml-4 p-2 rounded-lg outline-none"
+                      value={version}
+                      onChange={(e) => {
+                        setVersion(e.target.value);
+                        console.log("버전 변경됨: ", e.target.value);
+                      }}
+                    >
+                      {Object.entries(VERSIONS).map(([key]) => (
+                        <option value={key}>{key}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <small className="px-0.5 text-sm font-light text-gray-500">
+                    구현체 버전에 맞는 코드를 사용해주세요. 그렇지 않으면
+                    정상적으로 실행되지 않을 수 있습니다.
+                  </small>
                 </div>
+
                 <hr />
                 <div className="px-2.5 py-1.5">
                   <div className="text-xl flex justify-between items-center mb-1">
@@ -295,7 +325,7 @@ const App: React.FC = () => {
 
                       setChatList(newChatList);
 
-                      let result = runMolu(code, {
+                      let result = (VERSIONS as any)[version](code, {
                         inputFn: () => "1\n",
                         maxRecursion,
                       });
