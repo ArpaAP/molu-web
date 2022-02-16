@@ -326,7 +326,17 @@ const App: React.FC = () => {
                       setChatList(newChatList);
 
                       let result = (VERSIONS as any)[version](code, {
-                        inputFn: () => "1\n",
+                        inputFn: () => {
+                          while (1) {
+                            let input = prompt("값을 입력합니다: ");
+
+                            if (isFinite(Number(input))) {
+                              return input;
+                            }
+
+                            alert("숫자만 입력할 수 있습니다.");
+                          }
+                        },
                         maxRecursion,
                       });
                       console.log(result);
