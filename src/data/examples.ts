@@ -25,7 +25,7 @@ const EXAMPLES: Example[] = [
     version: "1.1.2",
   },
   {
-    name: "addiction",
+    name: "addition",
     code: `몰루?모올루?몰모올루`,
     version: "1.1.2",
   },
