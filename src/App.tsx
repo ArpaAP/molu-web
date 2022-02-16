@@ -1,4 +1,4 @@
-import React, { ReactNode, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import background from "./images/background.jpg";
@@ -25,6 +25,10 @@ const App: React.FC = () => {
   const [maxRecursion, setMaxRecursion] = useState(100000);
   const [version, setVersion] = useState("1.1.2");
 
+  const isEnter = useRef(false);
+  const isCtrl = useRef(false);
+  const isPressed = useRef(false);
+
   const [chatList, setChatList] = useState<
     {
       type: "input" | "output";
@@ -39,6 +43,80 @@ const App: React.FC = () => {
         "몰랭 웹 인터프리터에 오신 것을 환영합니다!\n이곳에서 몰랭 코드를 실행하고 결과를 확인할 수 있습니다!",
     },
   ]);
+
+  const runCode = () => {
+    let code = codeRef.current!.value;
+
+    if (!code) return alert("코드를 입력하세요!");
+
+    let newChatList = [...chatList];
+
+    newChatList = newChatList.concat({
+      type: "input",
+      content: code,
+    });
+
+    setChatList(newChatList);
+
+    let result = (VERSIONS as any)[version](code, {
+      inputFn: () => {
+        while (1) {
+          let input = prompt("값을 입력합니다: ");
+
+          if (isFinite(Number(input))) {
+            return input;
+          }
+
+          alert("숫자만 입력할 수 있습니다.");
+        }
+      },
+      maxRecursion,
+    });
+    console.log(result);
+
+    newChatList = newChatList.concat({
+      type: "output",
+      content: result[0].join("") as string,
+      exitCode: result[0][0] ? 0 : (result[1][0] as number),
+      error: (result[2][0] as string) ?? null,
+    });
+
+    setChatList(newChatList);
+
+    setTimeout(
+      () =>
+        bottomRef.current?.scrollIntoView({
+          behavior: "smooth",
+        }),
+      10
+    );
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      isEnter.current = e.key === "Enter";
+      isCtrl.current = e.ctrlKey;
+
+      if (isEnter.current && isCtrl.current && !isPressed.current) {
+        isPressed.current = true;
+        runCode();
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      isEnter.current = false;
+      isCtrl.current = false;
+      isPressed.current = false;
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  });
 
   return (
     <div className="overflow-hidden">
@@ -126,8 +204,9 @@ const App: React.FC = () => {
                 <div className="px-2.5 text-lg">예제 불러오기</div>
                 <hr />
                 {EXAMPLES.filter((one) => one.version === version).map(
-                  (one) => (
+                  (one, i) => (
                     <div
+                      key={i}
                       className="h-12 bg-slate-200 flex items-center p-2 text-xl mx-2 rounded-lg cursor-pointer"
                       onClick={() => {
                         codeRef.current!.value = one.code;
@@ -314,50 +393,7 @@ const App: React.FC = () => {
                   <button
                     type="button"
                     className="w-20 h-full text-xl bg-blue-400 hover:brightness-110 transition-all duration-300"
-                    onClick={async () => {
-                      let code = codeRef.current!.value;
-                      let newChatList = [...chatList];
-
-                      newChatList = newChatList.concat({
-                        type: "input",
-                        content: code,
-                      });
-
-                      setChatList(newChatList);
-
-                      let result = (VERSIONS as any)[version](code, {
-                        inputFn: () => {
-                          while (1) {
-                            let input = prompt("값을 입력합니다: ");
-
-                            if (isFinite(Number(input))) {
-                              return input;
-                            }
-
-                            alert("숫자만 입력할 수 있습니다.");
-                          }
-                        },
-                        maxRecursion,
-                      });
-                      console.log(result);
-
-                      newChatList = newChatList.concat({
-                        type: "output",
-                        content: result[0].join("") as string,
-                        exitCode: result[0][0] ? 0 : (result[1][0] as number),
-                        error: (result[2][0] as string) ?? null,
-                      });
-
-                      setChatList(newChatList);
-
-                      setTimeout(
-                        () =>
-                          bottomRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                          }),
-                        10
-                      );
-                    }}
+                    onClick={runCode}
                   >
                     실행
                   </button>
