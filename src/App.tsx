@@ -387,7 +387,7 @@ const App: React.FC = () => {
                   className="w-full h-full resize-none outline-none p-2"
                   spellCheck="false"
                   placeholder="몰랭 코드 입력..."
-                  style={{ fontFamily: "Consolas, Gulim" }}
+                  style={{ fontFamily: "Menlo, Monaco, Consolas, Gulim" }}
                 />
                 <div className="flex flex-col">
                   <button
